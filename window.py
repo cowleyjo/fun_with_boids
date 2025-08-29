@@ -9,6 +9,8 @@ TWEAK_WINDOW = True
 # --------- Pygame Setup ---------
 WIDTH, HEIGHT = 800, 600
 
+EDGE_GAP = 70
+
 WHITE = (255, 255, 255)
 BLUE = (50, 100, 255)
 triangle_pos = pygame.math.Vector2(WIDTH // 2, HEIGHT // 2)
@@ -46,13 +48,9 @@ def game_loop():
 
         screen.fill((0, 0, 0))
 
-        for boid in boids:
-            boid.update()
-            pygame.draw.polygon(screen, BLUE, boid.triangle_points())
-
-        # pygame.draw.circle(screen, "red", player_pos, 40)
-
-        # pygame.draw.polygon(screen, "red", [(250, 100), (150, 400), (350, 400)], 0)
+        # for boid in boids:
+        #     boid.update()
+        #     pygame.draw.polygon(screen, BLUE, boid.triangle_points())
 
         # --- Test Triangle ---
         keys = pygame.key.get_pressed()
@@ -68,6 +66,20 @@ def game_loop():
             rad = math.radians(angle)
             movement = pygame.math.Vector2(-math.sin(rad), math.cos(rad)) * speed
             triangle_pos += movement
+
+
+        # Edge Teleport for X Direction
+        if triangle_pos.x < -EDGE_GAP:
+            triangle_pos.x = WIDTH
+        if triangle_pos.x > WIDTH + EDGE_GAP:
+            triangle_pos.x = 0
+        
+        # Edge Teleport for Y Direction
+        if triangle_pos.y < -EDGE_GAP:
+            triangle_pos.y = HEIGHT
+        if triangle_pos.y > HEIGHT + EDGE_GAP:
+            triangle_pos.y = 0
+
 
         moved_points = [triangle_pos + point.rotate(angle) for point in triangle_points]
         pygame.draw.polygon(screen, BLUE, moved_points)
@@ -85,19 +97,32 @@ if TWEAK_WINDOW:
     import tkinter
     from tkinter import ttk
 
-    def update_speed(val):
+    speed_var = tkinter.DoubleVar(value=speed)
+
+    def update_speed():
         global speed
-        speed = float(val)
+        speed = speed_var
+        print(f"Speed: {val}")
     
     def update_rotation_speed(val):
         global rotation_speed
         rotation_speed = float(val)
+        print(f"Rotation Speed: {val}")
+
+    def update_edge_gap(val):
+        global EDGE_GAP
+        EDGE_GAP = float(val)
+        print(f"Edge Gap: {val}")
 
     root = tkinter.Tk()
     root.title("Game Tweaker")
     root.geometry("400x200")
 
+
     tkinter.Label(root, text="Speed").pack()
+    speed_input = tkinter.Spinbox(root, from_=0, to=50, increment=0.5, textvariable=speed, command=update_speed)
+    speed_input.pack()
+
     speed_slider = ttk.Scale(root, from_=1, to=20, orient="horizontal", command=update_speed)
     speed_slider.set(speed)
     speed_slider.pack()
@@ -106,6 +131,11 @@ if TWEAK_WINDOW:
     rotation_slider = ttk.Scale(root, from_=1, to=10, orient="horizontal", command=update_rotation_speed)
     rotation_slider.set(rotation_speed)
     rotation_slider.pack()
+
+    tkinter.Label(root, text="Edge Gap").pack()
+    edge_slider = ttk.Scale(root, from_=1, to=100, orient="horizontal", command=update_edge_gap)
+    edge_slider.set(EDGE_GAP)
+    edge_slider.pack()
 
     # Run the GUI in a separate thread
     import threading
@@ -118,3 +148,4 @@ if TWEAK_WINDOW:
     pygame_thread.join()
 else:
     game_loop()
+
