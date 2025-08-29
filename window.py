@@ -1,9 +1,9 @@
 import pygame
-import tkinter
-from tkinter import ttk
 import math
+import random
+from boid import Boid
 
-TWEAK_WINDOW = False
+TWEAK_WINDOW = True
 
 
 # --------- Pygame Setup ---------
@@ -19,6 +19,13 @@ angle = 0
 rotation_speed = 3
 speed = 5
 running = True
+
+
+# --------- TEST BOID INIT ---------
+boid_count = 10
+boids: list[Boid] = []
+for i in range(boid_count):
+    boids.append(Boid(random.randint(0, 500), random.randint(0, 500), random.randint(0, 360), random.randint(10, 20)))
 
 # --------- Game Loop Function ---------
 
@@ -39,10 +46,15 @@ def game_loop():
 
         screen.fill((0, 0, 0))
 
+        for boid in boids:
+            boid.update()
+            pygame.draw.polygon(screen, BLUE, boid.triangle_points())
+
         # pygame.draw.circle(screen, "red", player_pos, 40)
 
         # pygame.draw.polygon(screen, "red", [(250, 100), (150, 400), (350, 400)], 0)
 
+        # --- Test Triangle ---
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             angle -= rotation_speed
@@ -59,6 +71,7 @@ def game_loop():
 
         moved_points = [triangle_pos + point.rotate(angle) for point in triangle_points]
         pygame.draw.polygon(screen, BLUE, moved_points)
+        # ---------------------
 
         pygame.display.flip()
         clock.tick(60)
@@ -69,6 +82,9 @@ def game_loop():
 # --------- Tkinter GUI Setup ---------
 
 if TWEAK_WINDOW:
+    import tkinter
+    from tkinter import ttk
+
     def update_speed(val):
         global speed
         speed = float(val)
@@ -79,6 +95,7 @@ if TWEAK_WINDOW:
 
     root = tkinter.Tk()
     root.title("Game Tweaker")
+    root.geometry("400x200")
 
     tkinter.Label(root, text="Speed").pack()
     speed_slider = ttk.Scale(root, from_=1, to=20, orient="horizontal", command=update_speed)
