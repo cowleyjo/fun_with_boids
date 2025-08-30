@@ -143,9 +143,6 @@ if CONTROL_PANEL:
             update_boid_attribute(boids, var_name, value)
         except ValueError:
             print("Invalid Number")
-    
-    def print_vars():
-        print(f"Speed: {speed}\nRotation Speed: {rotation_speed}\nEDGE_GAP: {EDGE_GAP}")
 
 
     tkinter.Label(root, text="Speed").pack()
@@ -189,10 +186,6 @@ if CONTROL_PANEL:
     separation_entry.insert(0, str(SEPARATION_FACTOR))
     separation_entry.bind("<Return>", lambda event: update_value("SEPARATION_FACTOR", separation_entry, event))
     separation_entry.pack()
-
-
-    button = tkinter.Button(root, text="Print Vars", command=print_vars)
-    button.pack()
 
     # Run the GUI in a separate thread
     import threading

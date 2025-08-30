@@ -6,6 +6,7 @@ from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, S
 class Boid:
     def __init__(self, x, y, angle, size, speed):
         self.pos = pygame.math.Vector2(x, y)
+        self.velocity = pygame.math.Vector2(0, 0)
         self.angle = angle
         self.size = size
         self.speed = speed
@@ -29,7 +30,11 @@ class Boid:
         rad = math.radians(self.angle)
         self.pos += pygame.math.Vector2(math.sin(rad), -math.cos(rad)) * self.speed
 
-         # Edge Teleport for X Direction
+        neighbors = self.get_neighbors(boids)
+        # if neighbors:
+        #     self.pos = self.cohesion(neighbors)
+
+        # Edge Teleport for X Direction
         if self.pos.x < -EDGE_GAP:
             self.pos.x = WIDTH
         if self.pos.x > WIDTH + EDGE_GAP:
@@ -41,8 +46,7 @@ class Boid:
         if self.pos.y > HEIGHT + EDGE_GAP:
             self.pos.y = 0
 
-        neighbors = self.get_neighbors(boids)
-
+        
         # for neighbor in neighbors
         #   apply alignment, cohesion, and separation
         #   make sure to use the factors!!!!
@@ -66,8 +70,17 @@ class Boid:
         return neighbors
 
 
-    def cohesion(self):
-        pass
+    def cohesion(self, neighbors):
+        centerPos = self.pos
+        
+        for neighbor in neighbors:
+            centerPos.x += neighbor.pos.x
+            centerPos.y += neighbor.pos.y
+        
+        centerPos.x = centerPos.x / len(neighbors)
+        centerPos.y = centerPos.y / len(neighbors)
+        
+        return centerPos
 
     
 
