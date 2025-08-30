@@ -3,14 +3,13 @@ import math
 import random
 from boid import Boid
 
-TWEAK_WINDOW = True
+from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE
+
+CONTROL_PANEL = True
+VIS_DEBUG = True
 
 
 # --------- Pygame Setup ---------
-WIDTH, HEIGHT = 800, 600
-
-EDGE_GAP = 70
-
 WHITE = (255, 255, 255)
 BLUE = (50, 100, 255)
 triangle_pos = pygame.math.Vector2(WIDTH // 2, HEIGHT // 2)
@@ -27,7 +26,23 @@ running = True
 boid_count = 10
 boids: list[Boid] = []
 for i in range(boid_count):
-    boids.append(Boid(random.randint(0, 500), random.randint(0, 500), random.randint(0, 360), random.randint(10, 20)))
+    boids.append(Boid(random.randint(0, 500), random.randint(0, 500), random.randint(0, 360), random.randint(10, 20), speed))
+
+def update_boid_attribute(boids: list[Boid], var_name: str, var: float):
+    for boid in boids:
+        match var_name:
+            case "speed":
+                boid.speed = var
+            case "rotation_speed":
+                boid.angle = var
+            case "VIS_RANGE":
+                boid.vis_range = var
+            case "ALIGNMENT_FACTOR":
+                pass
+            case "COHESION_FACTOR":
+                pass
+            case "SEPARATION_FACTOR":
+                pass
 
 # --------- Game Loop Function ---------
 
@@ -48,9 +63,12 @@ def game_loop():
 
         screen.fill((0, 0, 0))
 
-        # for boid in boids:
-        #     boid.update()
-        #     pygame.draw.polygon(screen, BLUE, boid.triangle_points())
+        for boid in boids:
+            boid.update(boids)
+            pygame.draw.polygon(screen, BLUE, boid.triangle_points())
+            if VIS_DEBUG: 
+                pygame.draw.circle(screen, (0, 255, 0), (boid.pos), boid.vis_range, width=1)
+
 
         # --- Test Triangle ---
         keys = pygame.key.get_pressed()
@@ -93,49 +111,88 @@ def game_loop():
 
 # --------- Tkinter GUI Setup ---------
 
-if TWEAK_WINDOW:
+if CONTROL_PANEL:
     import tkinter
     from tkinter import ttk
-
-    speed_var = tkinter.DoubleVar(value=speed)
-
-    def update_speed():
-        global speed
-        speed = speed_var
-        print(f"Speed: {val}")
     
-    def update_rotation_speed(val):
-        global rotation_speed
-        rotation_speed = float(val)
-        print(f"Rotation Speed: {val}")
-
-    def update_edge_gap(val):
-        global EDGE_GAP
-        EDGE_GAP = float(val)
-        print(f"Edge Gap: {val}")
-
     root = tkinter.Tk()
-    root.title("Game Tweaker")
-    root.geometry("400x200")
+    root.title("Control Panel")
+    root.geometry("400x400")
+
+    def update_value(var_name, entry: tkinter.Entry, event=None):
+        global speed, rotation_speed, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE
+        try:
+            value = float(entry.get())
+            print(f"{var_name} Updated: {value}")
+
+            match var_name:
+                case "speed":
+                    speed = value
+                case "rotation_speed":
+                    rotation_speed = value
+                case "EDGE_GAP":
+                    EDGE_GAP = value
+                case "ALIGNMENT_FACTOR":
+                    ALIGNMENT_FACTOR = value
+                case "COHESION_FACTOR":
+                    COHESION_FACTOR = value
+                case "SEPARATION_FACTOR":
+                    SEPARATION_FACTOR = value
+                case "VIS_RANGE":
+                    VIS_RANGE = value
+            update_boid_attribute(boids, var_name, value)
+        except ValueError:
+            print("Invalid Number")
+    
+    def print_vars():
+        print(f"Speed: {speed}\nRotation Speed: {rotation_speed}\nEDGE_GAP: {EDGE_GAP}")
 
 
     tkinter.Label(root, text="Speed").pack()
-    speed_input = tkinter.Spinbox(root, from_=0, to=50, increment=0.5, textvariable=speed, command=update_speed)
-    speed_input.pack()
-
-    speed_slider = ttk.Scale(root, from_=1, to=20, orient="horizontal", command=update_speed)
-    speed_slider.set(speed)
-    speed_slider.pack()
+    speed_entry = ttk.Entry(root)
+    speed_entry.insert(0, str(speed))
+    speed_entry.bind("<Return>", lambda event: update_value("speed", speed_entry, event))
+    speed_entry.pack()
 
     tkinter.Label(root, text="Rotation Speed").pack()
-    rotation_slider = ttk.Scale(root, from_=1, to=10, orient="horizontal", command=update_rotation_speed)
-    rotation_slider.set(rotation_speed)
-    rotation_slider.pack()
+    rotation_entry = ttk.Entry(root)
+    rotation_entry.insert(0, str(rotation_speed))
+    rotation_entry.bind("<Return>", lambda event: update_value("rotation_speed", rotation_entry, event))
+    rotation_entry.pack()
 
     tkinter.Label(root, text="Edge Gap").pack()
-    edge_slider = ttk.Scale(root, from_=1, to=100, orient="horizontal", command=update_edge_gap)
-    edge_slider.set(EDGE_GAP)
-    edge_slider.pack()
+    edge_entry = ttk.Entry(root)
+    edge_entry.insert(0, str(EDGE_GAP))
+    edge_entry.bind("<Return>", lambda event: update_value("EDGE_GAP", edge_entry, event))
+    edge_entry.pack()
+
+    tkinter.Label(root, text="VIS_RANGE").pack()
+    vis_entry = ttk.Entry(root)
+    vis_entry.insert(0, str(VIS_RANGE))
+    vis_entry.bind("<Return>", lambda event: update_value("VIS_RANGE", vis_entry, event))
+    vis_entry.pack()
+
+    tkinter.Label(root, text="ALIGNMENT FACTOR").pack()
+    alignment_entry = ttk.Entry(root)
+    alignment_entry.insert(0, str(ALIGNMENT_FACTOR))
+    alignment_entry.bind("<Return>", lambda event: update_value("ALIGNMENT_FACTOR", alignment_entry, event))
+    alignment_entry.pack()
+
+    tkinter.Label(root, text="COHESION FACTOR").pack()
+    cohesion_entry = ttk.Entry(root)
+    cohesion_entry.insert(0, str(COHESION_FACTOR))
+    cohesion_entry.bind("<Return>", lambda event: update_value("COHESION_FACTOR", cohesion_entry, event))
+    cohesion_entry.pack()
+
+    tkinter.Label(root, text="SEPARATION FACTOR").pack()
+    separation_entry = ttk.Entry(root)
+    separation_entry.insert(0, str(SEPARATION_FACTOR))
+    separation_entry.bind("<Return>", lambda event: update_value("SEPARATION_FACTOR", separation_entry, event))
+    separation_entry.pack()
+
+
+    button = tkinter.Button(root, text="Print Vars", command=print_vars)
+    button.pack()
 
     # Run the GUI in a separate thread
     import threading
