@@ -42,8 +42,12 @@ class Boid:
             self.pos.y = 0
 
         neighbors = self.get_neighbors(boids)
-        if neighbors:
-            print(f"Boid at ({self.pos.x:.1f}, {self.pos.y:.1f}) sees {len(neighbors)} neighbors")
+
+        # for neighbor in neighbors
+        #   apply alignment, cohesion, and separation
+        #   make sure to use the factors!!!!
+        # if neighbors:
+        #     print(f"Boid at ({self.pos.x:.1f}, {self.pos.y:.1f}) sees {len(neighbors)} neighbors")
 
 
     def get_neighbors(self, boids):
