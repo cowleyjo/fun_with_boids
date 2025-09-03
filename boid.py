@@ -1,7 +1,7 @@
 import math
 import pygame
 
-from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE
+from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE
 
 class Boid:
     def __init__(self, x, y, angle, size, speed):
@@ -11,6 +11,7 @@ class Boid:
         self.size = size
         self.speed = speed
         self.vis_range = VIS_RANGE
+        self.protect_range = PROTECT_RANGE
 
     def triangle_points(self):
         rad = math.radians(self.angle)
@@ -32,7 +33,8 @@ class Boid:
 
         neighbors = self.get_neighbors(boids)
         # if neighbors:
-        #     self.pos = self.cohesion(neighbors)
+        #     self.cohesion(neighbors)
+        #     self.separation(neighbors)
 
         # Edge Teleport for X Direction
         if self.pos.x < -EDGE_GAP:

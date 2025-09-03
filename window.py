@@ -3,7 +3,7 @@ import math
 import random
 from boid import Boid
 
-from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE
+from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE
 
 CONTROL_PANEL = True
 VIS_DEBUG = True
@@ -37,6 +37,8 @@ def update_boid_attribute(boids: list[Boid], var_name: str, var: float):
                 boid.angle = var
             case "VIS_RANGE":
                 boid.vis_range = var
+            case "PROTECT_RANGE":
+                boid.protect_range = var
             case "ALIGNMENT_FACTOR":
                 pass
             case "COHESION_FACTOR":
@@ -68,6 +70,7 @@ def game_loop():
             pygame.draw.polygon(screen, BLUE, boid.triangle_points())
             if VIS_DEBUG: 
                 pygame.draw.circle(screen, (0, 255, 0), (boid.pos), boid.vis_range, width=1)
+                pygame.draw.circle(screen, (255, 0, 0), (boid.pos), boid.protect_range, width=1)
 
 
         # --- Test Triangle ---
@@ -140,6 +143,8 @@ if CONTROL_PANEL:
                     SEPARATION_FACTOR = value
                 case "VIS_RANGE":
                     VIS_RANGE = value
+                case "PROTECT_RANGE":
+                    PROTECT_RANGE = value
             update_boid_attribute(boids, var_name, value)
         except ValueError:
             print("Invalid Number")
@@ -168,6 +173,12 @@ if CONTROL_PANEL:
     vis_entry.insert(0, str(VIS_RANGE))
     vis_entry.bind("<Return>", lambda event: update_value("VIS_RANGE", vis_entry, event))
     vis_entry.pack()
+
+    tkinter.Label(root, text="PROTECT_RANGE").pack()
+    protect_entry = ttk.Entry(root)
+    protect_entry.insert(0, str(PROTECT_RANGE))
+    protect_entry.bind("<Return>", lambda event: update_value("PROTECT_RANGE", protect_entry, event))
+    protect_entry.pack()
 
     tkinter.Label(root, text="ALIGNMENT FACTOR").pack()
     alignment_entry = ttk.Entry(root)
