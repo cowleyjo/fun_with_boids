@@ -3,10 +3,10 @@ import math
 import random
 from boid import Boid
 
-from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE
+from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE, MAX_SPEED
 
 CONTROL_PANEL = True
-VIS_DEBUG = True
+VIS_DEBUG = False
 
 
 # --------- Pygame Setup ---------
@@ -26,25 +26,21 @@ running = True
 boid_count = 10
 boids: list[Boid] = []
 for i in range(boid_count):
-    boids.append(Boid(random.randint(0, 500), random.randint(0, 500), random.randint(0, 360), random.randint(10, 20), speed))
+    boids.append(Boid(random.randint(0, 500), random.randint(0, 500), random.randint(0, 360), random.randint(10, 20)))
 
 def update_boid_attribute(boids: list[Boid], var_name: str, var: float):
     for boid in boids:
         match var_name:
-            case "speed":
-                boid.speed = var
-            case "rotation_speed":
-                boid.angle = var
             case "VIS_RANGE":
                 boid.vis_range = var
             case "PROTECT_RANGE":
                 boid.protect_range = var
             case "ALIGNMENT_FACTOR":
-                pass
+                boid.alignment_factor = var
             case "COHESION_FACTOR":
-                pass
+                boid.cohesion_factor = var
             case "SEPARATION_FACTOR":
-                pass
+                boid.separation_factor = var
 
 # --------- Game Loop Function ---------
 
@@ -123,14 +119,14 @@ if CONTROL_PANEL:
     root.geometry("400x400")
 
     def update_value(var_name, entry: tkinter.Entry, event=None):
-        global speed, rotation_speed, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE
+        global speed, rotation_speed, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE, MAX_SPEED
         try:
             value = float(entry.get())
             print(f"{var_name} Updated: {value}")
 
             match var_name:
                 case "speed":
-                    speed = value
+                    MAX_SPEED = value
                 case "rotation_speed":
                     rotation_speed = value
                 case "EDGE_GAP":

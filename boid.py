@@ -1,17 +1,22 @@
 import math
 import pygame
+import random
 
-from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE
+from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE, MAX_SPEED
 
 class Boid:
-    def __init__(self, x, y, angle, size, speed):
+    def __init__(self, x, y, angle, size):
         self.pos = pygame.math.Vector2(x, y)
-        self.velocity = pygame.math.Vector2(0, 0)
+        dir_vec = pygame.math.Vector2(math.cos(math.radians(angle)),
+                                      math.sin(math.radians(angle)))
+        self.velocity = dir_vec.normalize() * random.uniform(2, MAX_SPEED)
         self.angle = angle
         self.size = size
-        self.speed = speed
         self.vis_range = VIS_RANGE
         self.protect_range = PROTECT_RANGE
+        self.alignment_factor = ALIGNMENT_FACTOR
+        self.cohesion_factor = COHESION_FACTOR
+        self.separation_factor = SEPARATION_FACTOR
 
     def triangle_points(self):
         rad = math.radians(self.angle)
@@ -28,13 +33,24 @@ class Boid:
         return [p1, p2, p3]
     
     def update(self, boids):
-        rad = math.radians(self.angle)
-        self.pos += pygame.math.Vector2(math.sin(rad), -math.cos(rad)) * self.speed
+        
+        speed = self.velocity.length()
+        if speed > MAX_SPEED:
+            self.velocity = self.velocity.normalize() * MAX_SPEED
+        elif speed < 3:
+            self.velocity.scale_to_length(3)
+        
+        self.pos += self.velocity
+
+        if self.velocity.length_squared() > 0:
+            self.angle = math.degrees(math.atan2(self.velocity.y, self.velocity.x)) + 90
+    
 
         neighbors = self.get_neighbors(boids)
-        # if neighbors:
-        #     self.cohesion(neighbors)
-        #     self.separation(neighbors)
+        if neighbors:
+            self.cohesion(neighbors)
+            self.separation(self.get_dangerous_neighbors(neighbors))
+            self.alignment(neighbors)
 
         # Edge Teleport for X Direction
         if self.pos.x < -EDGE_GAP:
@@ -48,14 +64,7 @@ class Boid:
         if self.pos.y > HEIGHT + EDGE_GAP:
             self.pos.y = 0
 
-        
-        # for neighbor in neighbors
-        #   apply alignment, cohesion, and separation
-        #   make sure to use the factors!!!!
-        # if neighbors:
-        #     print(f"Boid at ({self.pos.x:.1f}, {self.pos.y:.1f}) sees {len(neighbors)} neighbors")
-
-
+    # Returns a list of all boids within the visibility range
     def get_neighbors(self, boids):
         neighbors = []
         for other in boids:
@@ -70,19 +79,55 @@ class Boid:
                 neighbors.append(other)
                 # print("neighbor added!")
         return neighbors
+    
+    # Returns a list of all boids within the protected range (Calls get_neighbors)
+    def get_dangerous_neighbors(self, neighbors):
+        dangerous_neighbors = []
+    
+        for neighbor in neighbors:
+            dx = neighbor.pos.x - self.pos.x
+            dy = neighbor.pos.y - self.pos.y
+            dist = math.sqrt(dx*dx + dy*dy)
+
+            if dist < self.protect_range:
+                dangerous_neighbors.append(neighbor)
+        
+        return dangerous_neighbors
 
 
-    def cohesion(self, neighbors):
-        centerPos = self.pos
+    def alignment(self, neighbors):
+        xvel_avg = 0
+        yvel_avg = 0
         
         for neighbor in neighbors:
-            centerPos.x += neighbor.pos.x
-            centerPos.y += neighbor.pos.y
+            xvel_avg += neighbor.velocity.x
+            yvel_avg += neighbor.velocity.y
         
-        centerPos.x = centerPos.x / len(neighbors)
-        centerPos.y = centerPos.y / len(neighbors)
+        xvel_avg = xvel_avg / len(neighbors)
+        yvel_avg = yvel_avg / len(neighbors)
+
+        self.velocity.x += (xvel_avg - self.velocity.x) * self.alignment_factor
+        self.velocity.y += (yvel_avg - self.velocity.y) * self.alignment_factor
         
-        return centerPos
+    def separation(self, dang_neighbors):
+        for boid in dang_neighbors:
+            offset = self.pos - boid.pos
+            dist = offset.length()
+            if dist > 0:
+                self.velocity += (offset / dist) * self.separation_factor
+    def cohesion(self, neighbors):
+        xpos_avg = 0
+        ypos_avg = 0
+
+        for boid in neighbors:
+            xpos_avg += boid.pos.x
+            ypos_avg += boid.pos.y
+
+        xpos_avg = xpos_avg / len(neighbors)
+        ypos_avg = ypos_avg / len(neighbors)
+
+        self.velocity.x += (xpos_avg - self.pos.x) * self.cohesion_factor
+        self.velocity.y += (ypos_avg - self.pos.y) * self.cohesion_factor
 
     
 
