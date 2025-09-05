@@ -5,7 +5,7 @@ from boid import Boid
 
 from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE, MAX_SPEED
 
-CONTROL_PANEL = True
+CONTROL_PANEL = False
 VIS_DEBUG = False
 
 
@@ -23,10 +23,11 @@ running = True
 
 
 # --------- TEST BOID INIT ---------
-boid_count = 10
+boid_count = 50
 boids: list[Boid] = []
 for i in range(boid_count):
-    boids.append(Boid(random.randint(0, 500), random.randint(0, 500), random.randint(0, 360), random.randint(10, 20)))
+    # boids.append(Boid(random.randint(0, 500), random.randint(0, 500), random.randint(0, 360), random.randint(10, 20)))
+    boids.append(Boid(WIDTH // 2, HEIGHT // 2, random.randint(0, 360), random.randint(10, 20)))
 
 def update_boid_attribute(boids: list[Boid], var_name: str, var: float):
     for boid in boids:
