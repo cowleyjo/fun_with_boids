@@ -2,6 +2,7 @@ import math
 import pygame
 import random
 
+import config
 from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE, MAX_SPEED
 
 class Boid:
@@ -51,6 +52,8 @@ class Boid:
             self.cohesion(neighbors)
             self.separation(self.get_dangerous_neighbors(neighbors))
             self.alignment(neighbors)
+        
+        self.player_interaction(config.PLAYER_ATTRACT, config.PLAYER_X, config.PLAYER_Y)
 
         # Edge Teleport for X Direction
         if self.pos.x < -EDGE_GAP:
@@ -115,6 +118,7 @@ class Boid:
             dist = offset.length()
             if dist > 0:
                 self.velocity += (offset / dist) * self.separation_factor
+    
     def cohesion(self, neighbors):
         xpos_avg = 0
         ypos_avg = 0
@@ -129,5 +133,20 @@ class Boid:
         self.velocity.x += (xpos_avg - self.pos.x) * self.cohesion_factor
         self.velocity.y += (ypos_avg - self.pos.y) * self.cohesion_factor
 
+    def player_interaction(self, attraction, x, y):
+        dx = x - self.pos.x
+        dy = y - self.pos.y
+        dist = math.sqrt(dx*dx + dy*dy)
+
+        if dist < self.vis_range:
+            if config.PLAYER_ATTRACT > 0:
+                self.velocity.x += (config.PLAYER_X - self.pos.x) * (self.cohesion_factor * 10)
+                self.velocity.y += (config.PLAYER_Y - self.pos.y) * (self.cohesion_factor * 10)
+            elif config.PLAYER_ATTRACT < 0:
+                player_pos = pygame.math.Vector2(config.PLAYER_X, config.PLAYER_Y)
+                offset = self.pos - player_pos
+                new_dist = offset.length()
+                if new_dist > 0:
+                    self.velocity += (offset / new_dist) * (self.separation_factor * 2)
     
 

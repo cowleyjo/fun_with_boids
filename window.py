@@ -2,8 +2,15 @@ import pygame
 import math
 import random
 from boid import Boid
+import tkinter
+from tkinter import ttk
 
-from config import WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE, MAX_SPEED
+import config
+from config import (
+    WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, 
+    SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE, MAX_SPEED, BOID_COUNT,
+    PLAYER_ATTRACT
+)
 
 CONTROL_PANEL = False
 VIS_DEBUG = False
@@ -13,19 +20,17 @@ VIS_DEBUG = False
 WHITE = (255, 255, 255)
 BLUE = (50, 100, 255)
 triangle_pos = pygame.math.Vector2(WIDTH // 2, HEIGHT // 2)
-triangle_points = [pygame.math.Vector2(0, -20), pygame.math.Vector2(20, 20), pygame.math.Vector2(-20, 20)]
+triangle_points = [pygame.math.Vector2(0, -10), pygame.math.Vector2(10, 10), pygame.math.Vector2(-10, 10)]
 angle = 0
 
-# Variables to be tweaked via GUI
+# Variables to be changed via GUI
 rotation_speed = 3
 speed = 5
 running = True
 
-
 # --------- TEST BOID INIT ---------
-boid_count = 50
 boids: list[Boid] = []
-for i in range(boid_count):
+for i in range(BOID_COUNT):
     # boids.append(Boid(random.randint(0, 500), random.randint(0, 500), random.randint(0, 360), random.randint(10, 20)))
     boids.append(Boid(WIDTH // 2, HEIGHT // 2, random.randint(0, 360), random.randint(10, 20)))
 
@@ -98,6 +103,9 @@ def game_loop():
         if triangle_pos.y > HEIGHT + EDGE_GAP:
             triangle_pos.y = 0
 
+        config.PLAYER_X = triangle_pos.x
+        config.PLAYER_Y = triangle_pos.y
+
 
         moved_points = [triangle_pos + point.rotate(angle) for point in triangle_points]
         pygame.draw.polygon(screen, BLUE, moved_points)
@@ -111,10 +119,28 @@ def game_loop():
 
 # --------- Tkinter GUI Setup ---------
 
+def attract():
+    config.PLAYER_ATTRACT = 1
+    start_menu.destroy()
+
+def separate():
+    config.PLAYER_ATTRACT = -1
+    start_menu.destroy()
+
+start_menu = tkinter.Tk()
+start_menu.title("Start Menu")
+start_menu.geometry("400x400")
+
+attract_button = tkinter.Button(start_menu, text="Attract to Player", command=attract)
+attract_button.pack()
+
+separate_button = tkinter.Button(start_menu, text="Run from Player", command=separate)
+separate_button.pack()
+
+start_menu.mainloop()
+
+
 if CONTROL_PANEL:
-    import tkinter
-    from tkinter import ttk
-    
     root = tkinter.Tk()
     root.title("Control Panel")
     root.geometry("400x400")
