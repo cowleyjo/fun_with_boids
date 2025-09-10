@@ -53,8 +53,11 @@ def update_boid_attribute(boids: list[Boid], var_name: str, var: float):
 def game_loop():
     global triangle_pos, angle, speed, rotation_speed, running
     pygame.init()
+    
+    info = pygame.display.Info()
+    config.WIDTH, config.HEIGHT = info.current_w, info.current_h
 
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
     pygame.display.set_caption("Basic Game Window")
 
     # Clock for controlling FPS
@@ -64,6 +67,9 @@ def game_loop():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
 
         screen.fill((0, 0, 0))
 
@@ -93,14 +99,14 @@ def game_loop():
 
         # Edge Teleport for X Direction
         if triangle_pos.x < -EDGE_GAP:
-            triangle_pos.x = WIDTH
-        if triangle_pos.x > WIDTH + EDGE_GAP:
+            triangle_pos.x = config.WIDTH
+        if triangle_pos.x > config.WIDTH + EDGE_GAP:
             triangle_pos.x = 0
         
         # Edge Teleport for Y Direction
         if triangle_pos.y < -EDGE_GAP:
-            triangle_pos.y = HEIGHT
-        if triangle_pos.y > HEIGHT + EDGE_GAP:
+            triangle_pos.y = config.HEIGHT
+        if triangle_pos.y > config.HEIGHT + EDGE_GAP:
             triangle_pos.y = 0
 
         config.PLAYER_X = triangle_pos.x
