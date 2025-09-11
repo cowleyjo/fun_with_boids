@@ -4,6 +4,7 @@ import random
 from boid import Boid
 import tkinter
 from tkinter import ttk
+from PIL import Image, ImageTk
 
 import config
 from config import (
@@ -19,7 +20,7 @@ VIS_DEBUG = False
 # --------- Pygame Setup ---------
 WHITE = (255, 255, 255)
 BLUE = (50, 100, 255)
-triangle_pos = pygame.math.Vector2(WIDTH // 2, HEIGHT // 2)
+triangle_pos = pygame.math.Vector2(config.WIDTH // 2, config.HEIGHT // 2)
 triangle_points = [pygame.math.Vector2(0, -10), pygame.math.Vector2(10, 10), pygame.math.Vector2(-10, 10)]
 angle = 0
 
@@ -32,7 +33,7 @@ running = True
 boids: list[Boid] = []
 for i in range(BOID_COUNT):
     # boids.append(Boid(random.randint(0, 500), random.randint(0, 500), random.randint(0, 360), random.randint(10, 20)))
-    boids.append(Boid(WIDTH // 2, HEIGHT // 2, random.randint(0, 360), random.randint(10, 20)))
+    boids.append(Boid(config.WIDTH // 2, config.HEIGHT // 2, random.randint(0, 360), random.randint(10, 20)))
 
 def update_boid_attribute(boids: list[Boid], var_name: str, var: float):
     for boid in boids:
@@ -54,7 +55,13 @@ def game_loop():
     global triangle_pos, angle, speed, rotation_speed, running
     pygame.init()
 
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    info = pygame.display.Info()  # Get display info
+    screen_width, screen_height = info.current_w, info.current_h
+
+    config.WIDTH = screen_width
+    config.HEIGHT = screen_height
+
+    screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
     pygame.display.set_caption("Basic Game Window")
 
     # Clock for controlling FPS
@@ -64,6 +71,9 @@ def game_loop():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
 
         screen.fill((0, 0, 0))
 
@@ -93,14 +103,14 @@ def game_loop():
 
         # Edge Teleport for X Direction
         if triangle_pos.x < -EDGE_GAP:
-            triangle_pos.x = WIDTH
-        if triangle_pos.x > WIDTH + EDGE_GAP:
+            triangle_pos.x = config.WIDTH
+        if triangle_pos.x > config.WIDTH + EDGE_GAP:
             triangle_pos.x = 0
         
         # Edge Teleport for Y Direction
         if triangle_pos.y < -EDGE_GAP:
-            triangle_pos.y = HEIGHT
-        if triangle_pos.y > HEIGHT + EDGE_GAP:
+            triangle_pos.y = config.HEIGHT
+        if triangle_pos.y > config.HEIGHT + EDGE_GAP:
             triangle_pos.y = 0
 
         config.PLAYER_X = triangle_pos.x
@@ -108,7 +118,7 @@ def game_loop():
 
 
         moved_points = [triangle_pos + point.rotate(angle) for point in triangle_points]
-        pygame.draw.polygon(screen, BLUE, moved_points)
+        pygame.draw.polygon(screen, (255, 0, 0), moved_points)
         # ---------------------
 
         pygame.display.flip()
@@ -129,13 +139,37 @@ def separate():
 
 start_menu = tkinter.Tk()
 start_menu.title("Start Menu")
-start_menu.geometry("400x400")
+start_menu.geometry("1100x600")
 
-attract_button = tkinter.Button(start_menu, text="Attract to Player", command=attract)
-attract_button.pack()
+# Frame 1
+frame1 = tkinter.Frame(start_menu)
+frame1.pack(side="left", padx=20, pady=20)
 
-separate_button = tkinter.Button(start_menu, text="Run from Player", command=separate)
-separate_button.pack()
+cohesion_image = Image.open(r"C:\\Users\\Jonas\\Downloads\\Boid_Attracted_To_Player.png")
+
+# Resize to half size (or set custom width/height)
+cohesion_image = cohesion_image.resize((cohesion_image.width // 2, cohesion_image.height // 2), Image.LANCZOS)
+
+# Convert to Tkinter image
+cohesion_photo = ImageTk.PhotoImage(cohesion_image)
+
+tkinter.Label(frame1, text="Boids Go to Player", font=("Arial", 20, "bold")).pack()
+tkinter.Button(frame1, image = cohesion_photo, command=attract).pack()
+
+# Frame 2
+frame2 = tkinter.Frame(start_menu)
+frame2.pack(side="right", padx=20, pady=20)
+
+separation_image = Image.open(r"C:\\Users\\Jonas\\Downloads\\Boid_Run_From_Player.png")
+
+# Resize to half size (or set custom width/height)
+separation_image = separation_image.resize((separation_image.width // 2, separation_image.height // 2), Image.LANCZOS)
+
+# Convert to Tkinter image
+separation_photot = ImageTk.PhotoImage(separation_image)
+
+tkinter.Label(frame2, text="Boids Run From Player", font=("Arial", 20, "bold")).pack()
+tkinter.Button(frame2, image = separation_photot, command=separate).pack()
 
 start_menu.mainloop()
 
