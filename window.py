@@ -113,7 +113,10 @@ def game_loop():
         config.PLAYER_Y = triangle_pos.y
 
         moved_points = [triangle_pos + point.rotate(angle) for point in triangle_points]
-        pygame.draw.polygon(screen, (255, 0, 0), moved_points)
+        if config.PLAYER_ATTRACT == 0:
+            pygame.draw.polygon(screen, (0, 0, 0), moved_points)
+        else:
+            pygame.draw.polygon(screen, (255, 0, 0), moved_points)
         # ---------------------
 
         pygame.display.flip()
@@ -136,8 +139,54 @@ start_menu = tkinter.Tk()
 start_menu.title("Start Menu")
 start_menu.geometry("1100x600")
 
+def dropdown_vars():
+    match player_opt.get():
+        case "None":
+            config.PLAYER_ATTRACT = 0
+        case "Move to Player":
+            config.PLAYER_ATTRACT = 1
+        case "Move away from Player":
+            config.PLAYER_ATTRACT = -1
+
+    match mouse_opt.get():
+        case "None":
+            config.MOUSE_ATTRACT = 0
+        case "Move to Mouse":
+            config.MOUSE_ATTRACT = 1
+        case "Move away from Mouse":
+            config.MOUSE_ATTRACT = -1
+    
+    print(f"{config.PLAYER_ATTRACT=}")
+    print(f"{config.MOUSE_ATTRACT=}")
+    start_menu.destroy()
+
+tkinter.Label(start_menu, text="Player Interaction", font=("Arial", 20, "bold")).pack()
+# Dropdown options  
+player_options = ["None", "Move to Player", "Move away from Player"]  
+
+# Selected option variable  
+player_opt = tkinter.StringVar(value="None")  
+
+# Dropdown menu  
+tkinter.OptionMenu(start_menu, player_opt, *player_options).pack()
+
+tkinter.Label(start_menu, text="Mouse Interaction", font=("Arial", 20, "bold")).pack()
+# Dropdown options  
+mouse_options = ["None", "Move to Mouse", "Move away from Mouse"]  
+
+# Selected option variable  
+mouse_opt = tkinter.StringVar(value="None")  
+
+# Dropdown menu  
+tkinter.OptionMenu(start_menu, mouse_opt, *mouse_options).pack()
+
+tkinter.Button(start_menu, text="Confirm Dropdown Options", command=dropdown_vars).pack()
+
+# ========== Outdated Start Menu ==========
+'''
 # Frame 1
 frame1 = tkinter.Frame(start_menu)
+
 frame1.pack(side="left", padx=20, pady=20)
 
 cohesion_image = Image.open(r"C:\\Users\\Jonas\\Downloads\\Boid_Attracted_To_Player.png")
@@ -165,6 +214,8 @@ separation_photot = ImageTk.PhotoImage(separation_image)
 
 tkinter.Label(frame2, text="Boids Run From Player", font=("Arial", 20, "bold")).pack()
 tkinter.Button(frame2, image = separation_photot, command=separate).pack()
+'''
+# ========== Outdated Start Menu ==========
 
 start_menu.mainloop()
 
