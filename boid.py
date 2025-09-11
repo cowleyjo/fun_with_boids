@@ -57,14 +57,14 @@ class Boid:
 
         # Edge Teleport for X Direction
         if self.pos.x < -EDGE_GAP:
-            self.pos.x = config.WIDTH
-        if self.pos.x > config.WIDTH + EDGE_GAP:
+            self.pos.x = config.config.WIDTH
+        if self.pos.x > config.config.WIDTH + EDGE_GAP:
             self.pos.x = 0
         
         # Edge Teleport for Y Direction
         if self.pos.y < -EDGE_GAP:
-            self.pos.y = config.HEIGHT
-        if self.pos.y > config.HEIGHT + EDGE_GAP:
+            self.pos.y = config.config.HEIGHT
+        if self.pos.y > config.config.HEIGHT + EDGE_GAP:
             self.pos.y = 0
 
     # Returns a list of all boids within the visibility range
@@ -146,5 +146,11 @@ class Boid:
                 player_pos = pygame.math.Vector2(config.PLAYER_X, config.PLAYER_Y)
                 offset = self.pos - player_pos
                 self.velocity += (offset / dist) * (self.separation_factor * 2)
+            elif config.PLAYER_ATTRACT < 0:
+                player_pos = pygame.math.Vector2(config.PLAYER_X, config.PLAYER_Y)
+                offset = self.pos - player_pos
+                new_dist = offset.length()
+                if new_dist > 0:
+                    self.velocity += (offset / new_dist) * (self.separation_factor * config.PLAYER_SEPARATION)
     
 

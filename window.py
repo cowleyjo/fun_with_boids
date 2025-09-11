@@ -54,12 +54,9 @@ def update_boid_attribute(boids: list[Boid], var_name: str, var: float):
 def game_loop():
     global triangle_pos, angle, speed, rotation_speed, running
     pygame.init()
-
-    info = pygame.display.Info()  # Get display info
-    screen_width, screen_height = info.current_w, info.current_h
-
-    config.WIDTH = screen_width
-    config.HEIGHT = screen_height
+    
+    info = pygame.display.Info()
+    config.WIDTH, config.HEIGHT = info.current_w, info.current_h
 
     screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
     pygame.display.set_caption("Basic Game Window")
@@ -70,6 +67,10 @@ def game_loop():
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
                 running = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -105,10 +106,14 @@ def game_loop():
         if triangle_pos.x < -EDGE_GAP:
             triangle_pos.x = config.WIDTH
         if triangle_pos.x > config.WIDTH + EDGE_GAP:
+            triangle_pos.x = config.WIDTH
+        if triangle_pos.x > config.WIDTH + EDGE_GAP:
             triangle_pos.x = 0
         
         # Edge Teleport for Y Direction
         if triangle_pos.y < -EDGE_GAP:
+            triangle_pos.y = config.HEIGHT
+        if triangle_pos.y > config.HEIGHT + EDGE_GAP:
             triangle_pos.y = config.HEIGHT
         if triangle_pos.y > config.HEIGHT + EDGE_GAP:
             triangle_pos.y = 0
