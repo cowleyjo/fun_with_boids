@@ -8,9 +8,8 @@ from PIL import Image, ImageTk
 
 import config
 from config import (
-    WIDTH, HEIGHT, EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, 
+    EDGE_GAP, ALIGNMENT_FACTOR, COHESION_FACTOR, 
     SEPARATION_FACTOR, VIS_RANGE, PROTECT_RANGE, MAX_SPEED, BOID_COUNT,
-    PLAYER_ATTRACT
 )
 
 CONTROL_PANEL = False
@@ -33,7 +32,7 @@ running = True
 boids: list[Boid] = []
 for i in range(BOID_COUNT):
     # boids.append(Boid(random.randint(0, 500), random.randint(0, 500), random.randint(0, 360), random.randint(10, 20)))
-    boids.append(Boid(config.WIDTH // 2, config.HEIGHT // 2, random.randint(0, 360), random.randint(10, 20)))
+    boids.append(Boid(0, 0, random.randint(0, 360), random.randint(10, 20)))
 
 def update_boid_attribute(boids: list[Boid], var_name: str, var: float):
     for boid in boids:
@@ -102,21 +101,16 @@ def game_loop():
         if triangle_pos.x < -EDGE_GAP:
             triangle_pos.x = config.WIDTH
         if triangle_pos.x > config.WIDTH + EDGE_GAP:
-            triangle_pos.x = config.WIDTH
-        if triangle_pos.x > config.WIDTH + EDGE_GAP:
             triangle_pos.x = 0
         
         # Edge Teleport for Y Direction
         if triangle_pos.y < -EDGE_GAP:
             triangle_pos.y = config.HEIGHT
         if triangle_pos.y > config.HEIGHT + EDGE_GAP:
-            triangle_pos.y = config.HEIGHT
-        if triangle_pos.y > config.HEIGHT + EDGE_GAP:
             triangle_pos.y = 0
 
         config.PLAYER_X = triangle_pos.x
         config.PLAYER_Y = triangle_pos.y
-
 
         moved_points = [triangle_pos + point.rotate(angle) for point in triangle_points]
         pygame.draw.polygon(screen, (255, 0, 0), moved_points)
@@ -188,21 +182,21 @@ if CONTROL_PANEL:
 
             match var_name:
                 case "speed":
-                    MAX_SPEED = value
+                    config.MAX_SPEED = value
                 case "rotation_speed":
                     rotation_speed = value
                 case "EDGE_GAP":
-                    EDGE_GAP = value
+                    config.EDGE_GAP = value
                 case "ALIGNMENT_FACTOR":
-                    ALIGNMENT_FACTOR = value
+                    config.ALIGNMENT_FACTOR = value
                 case "COHESION_FACTOR":
-                    COHESION_FACTOR = value
+                    config.COHESION_FACTOR = value
                 case "SEPARATION_FACTOR":
-                    SEPARATION_FACTOR = value
+                    config.SEPARATION_FACTOR = value
                 case "VIS_RANGE":
-                    VIS_RANGE = value
+                    config.VIS_RANGE = value
                 case "PROTECT_RANGE":
-                    PROTECT_RANGE = value
+                    config.PROTECT_RANGE = value
             update_boid_attribute(boids, var_name, value)
         except ValueError:
             print("Invalid Number")

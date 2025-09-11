@@ -54,6 +54,7 @@ class Boid:
             self.alignment(neighbors)
         
         self.player_interaction(config.PLAYER_X, config.PLAYER_Y)
+        self.mouse_interaction()
 
         # Edge Teleport for X Direction
         if self.pos.x < -EDGE_GAP:
@@ -152,5 +153,19 @@ class Boid:
                 new_dist = offset.length()
                 if new_dist > 0:
                     self.velocity += (offset / new_dist) * (self.separation_factor * config.PLAYER_SEPARATION)
+
+    def mouse_interaction(self):
+        mouse_pos = pygame.math.Vector2(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
+        dx = mouse_pos.x - self.pos.x
+        dy = mouse_pos.y - self.pos.y
+        dist = math.sqrt(dx*dx + dy*dy)
+
+        if dist < self.vis_range:
+            if config.MOUSE_ATTRACT > 0:
+                self.velocity.x += (mouse_pos.x - self.pos.x) * (self.cohesion_factor * config.MOUSE_COHESION)
+                self.velocity.y += (mouse_pos.y - self.pos.y) * (self.cohesion_factor * config.MOUSE_COHESION)
+            elif config.MOUSE_ATTRACT < 0:
+                offset = self.pos - mouse_pos
+                self.velocity += (offset / dist) * (self.separation_factor * 2)
     
 
